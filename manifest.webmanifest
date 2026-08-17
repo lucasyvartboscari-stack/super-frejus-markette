@@ -1,0 +1,16 @@
+{
+  "name": "Super Fréjus Markette",
+  "short_name": "Markette",
+  "description": "Liste de courses par magasin à Fréjus, avec prix et distances.",
+  "lang": "fr",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#F8F7F2",
+  "theme_color": "#2F7D4E",
+  "icons": [
+    { "src": "icon.svg", "sizes": "192x192", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon-maskable.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

@@ -1,0 +1,918 @@
+<title>Super Fréjus Markette</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+  :root {
+    --bg: #F8F7F2;
+    --surface: #FFFFFF;
+    --ink: #1F2A1E;
+    --muted: #6B7362;
+    --line: #E5E4D8;
+    --accent: #2F7D4E;
+    --accent-ink: #FFFFFF;
+    --tint: #E9F2E8;
+    --warn: #C93F2B;
+    --warn-tint: #FBEAE6;
+    --chip: #EFEEE5;
+    --shadow: 0 1px 3px rgba(31,42,30,.08);
+    --scrim: rgba(31,42,30,.45);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141911;
+      --surface: #1D231A;
+      --ink: #ECEFE4;
+      --muted: #9AA48E;
+      --line: #2C3327;
+      --accent: #58B478;
+      --accent-ink: #0E2416;
+      --tint: #223226;
+      --warn: #E56A52;
+      --warn-tint: #3A241F;
+      --chip: #262C22;
+      --shadow: 0 1px 3px rgba(0,0,0,.4);
+      --scrim: rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #141911;
+    --surface: #1D231A;
+    --ink: #ECEFE4;
+    --muted: #9AA48E;
+    --line: #2C3327;
+    --accent: #58B478;
+    --accent-ink: #0E2416;
+    --tint: #223226;
+    --warn: #E56A52;
+    --warn-tint: #3A241F;
+    --chip: #262C22;
+    --shadow: 0 1px 3px rgba(0,0,0,.4);
+    --scrim: rgba(0,0,0,.6);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Segoe UI", Roboto, system-ui, -apple-system, sans-serif;
+    font-size: 16px;
+    line-height: 1.45;
+    padding-bottom: 76px;
+    min-height: 100vh;
+  }
+  button { font: inherit; color: inherit; cursor: pointer; border: none; background: none; padding: 0; }
+  button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+  /* ---------- header ---------- */
+  header {
+    position: sticky; top: 0; z-index: 20;
+    background: var(--bg);
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  .brand { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .brand .logo { flex: none; display: block; }
+  .brand .txt { display: flex; flex-direction: column; min-width: 0; }
+  .brand h1 { font-size: 19px; font-weight: 800; letter-spacing: -0.02em; margin: 0; line-height: 1.15; white-space: nowrap; }
+  .brand span { font-size: 12px; color: var(--muted); }
+  .searchwrap { position: relative; }
+  .searchwrap > svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+  #search {
+    width: 100%; padding: 12px 40px 12px 40px;
+    font-size: 16px; color: var(--ink);
+    background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+    box-shadow: var(--shadow);
+  }
+  #search::placeholder { color: var(--muted); }
+  #clearsearch {
+    position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+    width: 30px; height: 30px; border-radius: 50%;
+    color: var(--muted); font-size: 18px; line-height: 1;
+    display: none; align-items: center; justify-content: center;
+  }
+  #clearsearch.on { display: flex; }
+
+  #suggest {
+    position: absolute; left: 0; right: 0; top: calc(100% + 6px);
+    background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.14);
+    overflow: hidden; display: none;
+  }
+  #suggest.on { display: block; }
+  .sug {
+    display: flex; align-items: center; gap: 10px; width: 100%;
+    padding: 11px 14px; text-align: left; border-bottom: 1px solid var(--line);
+  }
+  .sug:last-child { border-bottom: none; }
+  .sug:active { background: var(--tint); }
+  .sug .name { flex: 1; font-weight: 600; }
+  .emo {
+    width: 34px; height: 34px; flex: none; border-radius: 9px;
+    background: var(--chip); font-size: 19px; line-height: 1;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .row .price {
+    display: block; font-size: 12.5px; font-weight: 600; color: var(--muted);
+    text-align: left; padding: 1px 0 0; font-variant-numeric: tabular-nums;
+  }
+  .row .price:active { color: var(--accent); }
+  .totalbar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 18px; padding: 13px 15px;
+    background: var(--tint); border: 1px solid var(--line); border-radius: 13px;
+    font-weight: 600;
+  }
+  .totalbar strong { font-size: 19px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .sug .cat { font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+  .sug .plus {
+    width: 26px; height: 26px; border-radius: 50%; flex: none;
+    background: var(--tint); color: var(--accent);
+    display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700;
+  }
+  .sug.custom .plus { background: var(--chip); }
+
+  /* store chips */
+  .chips { display: flex; gap: 8px; overflow-x: auto; padding: 10px 16px 4px; scrollbar-width: none; }
+  .chips::-webkit-scrollbar { display: none; }
+  .chip {
+    flex: none; display: flex; align-items: center; gap: 7px;
+    padding: 7px 14px; border-radius: 999px;
+    background: var(--chip); color: var(--ink);
+    font-size: 14.5px; font-weight: 600; white-space: nowrap;
+    border: 1px solid transparent;
+  }
+  .chip .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .chip .n { font-weight: 500; color: var(--muted); font-size: 13px; }
+  .chip.active { background: var(--accent); color: var(--accent-ink); }
+  .chip.active .n { color: var(--accent-ink); opacity: .8; }
+  .chip.ghost { color: var(--muted); border: 1px dashed var(--line); background: transparent; }
+
+  /* ---------- main ---------- */
+  main { padding: 4px 16px 24px; max-width: 620px; margin: 0 auto; }
+  .tabpane { display: none; }
+  .tabpane.on { display: block; }
+
+  .rayon { margin-top: 18px; }
+  .rayon h2 {
+    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em;
+    color: var(--muted); margin: 0 0 6px 4px;
+  }
+  .rayon h2.storehead {
+    display: flex; align-items: center; gap: 7px;
+    font-size: 13.5px; letter-spacing: .04em; color: var(--ink);
+    scroll-margin-top: 130px;
+  }
+  .storehead .sdot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+  .storehead .sname { min-width: 0; }
+  .storehead .stot { margin-left: auto; color: var(--muted); font-variant-numeric: tabular-nums; flex: none; }
+  .cardlist { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow); }
+  .row { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-bottom: 1px solid var(--line); }
+  .row:last-child { border-bottom: none; }
+  .row .name { flex: 1; font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
+  .row.done .name { text-decoration: line-through; color: var(--muted); font-weight: 500; }
+
+  .check {
+    width: 26px; height: 26px; border-radius: 8px; flex: none;
+    border: 2px solid var(--line); background: var(--surface);
+    display: flex; align-items: center; justify-content: center;
+    transition: background .15s, border-color .15s;
+  }
+  .row.done .check { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .check svg { opacity: 0; }
+  .row.done .check svg { opacity: 1; }
+
+  .stepper { display: flex; align-items: center; gap: 2px; flex: none; }
+  .stepper button {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: var(--chip); font-size: 17px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .stepper .q { min-width: 26px; text-align: center; font-variant-numeric: tabular-nums; font-weight: 700; }
+  .qty0 .q { color: var(--warn); }
+  .rowdel { width: 30px; height: 30px; flex: none; color: var(--muted); font-size: 18px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+  .badge-out { font-size: 11px; font-weight: 700; color: var(--warn); background: var(--warn-tint); padding: 2px 8px; border-radius: 999px; text-transform: uppercase; letter-spacing: .05em; display: inline-block; margin-top: 3px; }
+  .tolist { flex: none; font-size: 13px; font-weight: 700; color: var(--accent); background: var(--tint); padding: 6px 11px; border-radius: 999px; }
+
+  .bigbtn {
+    display: block; width: 100%; margin-top: 16px;
+    background: var(--accent); color: var(--accent-ink);
+    font-size: 16px; font-weight: 700; padding: 14px; border-radius: 13px;
+    box-shadow: var(--shadow);
+  }
+  .empty { text-align: center; color: var(--muted); padding: 46px 20px 30px; }
+  .empty strong { display: block; color: var(--ink); font-size: 17px; margin-bottom: 6px; }
+  .quickstores { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 16px; }
+  .quickstores .chip { border: 1px solid var(--line); }
+
+  /* stores tab */
+  .storecard { display: flex; align-items: center; gap: 11px; padding: 12px 13px; border-bottom: 1px solid var(--line); }
+  .storecard:last-child { border-bottom: none; }
+  .storecard .info { flex: 1; min-width: 0; }
+  .storecard .name { font-weight: 600; display: block; }
+  .storecard .addr { font-size: 12.5px; color: var(--muted); display: block; overflow-wrap: anywhere; }
+  .star {
+    width: 38px; height: 38px; flex: none; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); background: var(--chip);
+  }
+  .star.on { color: var(--accent); background: var(--tint); }
+  .mini { font-size: 13px; font-weight: 600; color: var(--muted); background: var(--chip); padding: 6px 11px; border-radius: 8px; flex: none; }
+  .mini.danger { color: var(--warn); background: var(--warn-tint); }
+
+  .addform { display: flex; gap: 8px; margin-top: 14px; }
+  .addform input {
+    flex: 1; min-width: 0; padding: 11px 14px; font-size: 16px; color: var(--ink);
+    background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+  }
+  .addform button { flex: none; background: var(--accent); color: var(--accent-ink); font-weight: 700; padding: 0 18px; border-radius: 12px; }
+  .hint { font-size: 13px; color: var(--muted); margin: 14px 4px 0; }
+
+  /* ---------- bottom sheet ---------- */
+  #sheetwrap {
+    position: fixed; inset: 0; z-index: 50;
+    display: none; align-items: flex-end; justify-content: center;
+    background: var(--scrim);
+  }
+  #sheetwrap.on { display: flex; }
+  #sheet {
+    background: var(--bg); width: 100%; max-width: 620px;
+    border-radius: 18px 18px 0 0;
+    max-height: 72vh; overflow-y: auto;
+    padding: 8px 16px calc(18px + env(safe-area-inset-bottom));
+  }
+  #sheet .grab { width: 40px; height: 4px; border-radius: 2px; background: var(--line); margin: 4px auto 10px; }
+  #sheet h3 { margin: 0 0 2px; font-size: 17px; font-weight: 800; }
+  #sheet .sub { font-size: 13px; color: var(--muted); margin: 0 0 12px; }
+  .shoprow {
+    display: flex; align-items: center; gap: 11px; width: 100%;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 13px;
+    padding: 11px 13px; margin-bottom: 8px; text-align: left;
+    box-shadow: var(--shadow);
+  }
+  .shoprow:active { background: var(--tint); }
+  .shoprow .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+  .shoprow .info { flex: 1; min-width: 0; }
+  .shoprow .name { font-weight: 700; display: block; }
+  .shoprow .addr { font-size: 12.5px; color: var(--muted); display: block; }
+  .shoprow .tag { flex: none; font-size: 11px; font-weight: 700; color: var(--accent); background: var(--tint); padding: 3px 9px; border-radius: 999px; text-transform: uppercase; letter-spacing: .04em; }
+  .shoprow .plus { width: 28px; height: 28px; border-radius: 50%; flex: none; background: var(--tint); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 19px; font-weight: 700; }
+
+  /* ---------- tab bar ---------- */
+  nav {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 30;
+    background: var(--surface); border-top: 1px solid var(--line);
+    display: flex; padding-bottom: env(safe-area-inset-bottom);
+  }
+  .tab {
+    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
+    padding: 9px 0 8px; color: var(--muted); font-size: 11.5px; font-weight: 600;
+    position: relative;
+  }
+  .tab.on { color: var(--accent); }
+  .tab .bub {
+    position: absolute; top: 4px; left: calc(50% + 8px);
+    min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px;
+    background: var(--warn); color: #fff; font-size: 11px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    font-variant-numeric: tabular-nums;
+  }
+  .tab .bub.green { background: var(--accent); color: var(--accent-ink); }
+  .tab .bub[hidden] { display: none; }
+
+  #toast {
+    position: fixed; bottom: 86px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--ink); color: var(--bg);
+    padding: 10px 18px; border-radius: 999px; font-size: 14.5px; font-weight: 600;
+    opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s;
+    z-index: 60; white-space: nowrap; max-width: 90vw; overflow: hidden; text-overflow: ellipsis;
+  }
+  #toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+
+<header>
+  <div class="brand">
+    <svg class="logo" width="42" height="42" viewBox="0 0 48 48" role="img" aria-label="Logo Super Fréjus Markette">
+      <rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="var(--accent)"/>
+      <!-- soleil -->
+      <circle cx="24" cy="15.5" r="5" fill="#F5C542"/>
+      <g stroke="#F5C542" stroke-width="2" stroke-linecap="round">
+        <path d="M24 6.2v2.4"/><path d="M15.6 9.3l1.7 1.7"/><path d="M32.4 9.3l-1.7 1.7"/>
+        <path d="M12.8 15.5h2.4"/><path d="M32.8 15.5h2.4"/>
+      </g>
+      <!-- panier -->
+      <path d="M12.5 24.5h23l-2.6 13.2a2.4 2.4 0 0 1-2.4 1.9H17.5a2.4 2.4 0 0 1-2.4-1.9z"
+            fill="var(--accent-ink)"/>
+      <path d="M18.5 24.5c0-4.5 2.2-7.5 5.5-7.5s5.5 3 5.5 7.5"
+            fill="none" stroke="var(--accent-ink)" stroke-width="2.4" stroke-linecap="round"/>
+      <g stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round">
+        <path d="M19.5 28.5l1 7.5"/><path d="M24 28.5v7.5"/><path d="M28.5 28.5l-1 7.5"/>
+      </g>
+    </svg>
+    <div class="txt">
+      <h1>Super Fréjus Markette</h1>
+      <span>Tour de Mare, Fréjus — distances depuis la maison</span>
+    </div>
+  </div>
+  <div class="searchwrap">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg>
+    <input id="search" type="text" placeholder="Tapez un produit (ex. lait)…" autocomplete="off" aria-label="Chercher un produit">
+    <button id="clearsearch" aria-label="Effacer la recherche">✕</button>
+    <div id="suggest" role="listbox"></div>
+  </div>
+</header>
+
+<div class="chips" id="storechips"></div>
+
+<main>
+  <section id="pane-courses" class="tabpane on"></section>
+  <section id="pane-magasins" class="tabpane"></section>
+</main>
+
+<nav>
+  <button class="tab on" id="tab-courses" aria-label="Onglet liste de courses">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.6 12.2a1.6 1.6 0 0 0 1.6 1.3h8.9a1.6 1.6 0 0 0 1.6-1.2L21.8 8H6"/><circle cx="10" cy="21" r="1.4"/><circle cx="17.5" cy="21" r="1.4"/></svg>
+    Liste de courses<span class="bub green" id="bub-courses" hidden></span>
+  </button>
+  <button class="tab" id="tab-magasins" aria-label="Onglet magasins">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5 5.5 4h13L20 9.5M4 9.5a2.5 2.5 0 0 0 5 0 2.5 2.5 0 0 0 5 0 2.5 2.5 0 0 0 5 0M5.5 12v8h13v-8"/><path d="M9.5 20v-5h5v5"/></svg>
+    Magasins
+  </button>
+</nav>
+
+<div id="sheetwrap" role="dialog" aria-modal="true">
+  <div id="sheet">
+    <div class="grab"></div>
+    <h3 id="sheet-title"></h3>
+    <p class="sub">Magasins qui l'ont en rayon, du plus proche de la maison au plus loin. Touchez-en un : l'article rejoint sa liste.</p>
+    <div id="sheet-list"></div>
+  </div>
+</div>
+
+<div id="toast" role="status"></div>
+
+<script>
+"use strict";
+
+/* ------------------ catalogue produits ------------------ */
+const CATS = ["Fruits & Légumes","Boulangerie","Crèmerie & Œufs","Viande & Poisson","Épicerie","Boissons","Surgelés","Hygiène","Entretien","Divers"];
+/* [nom, rayon, image, prix indicatif €] — prix moyens France 2026, modifiables dans l'appli */
+const CATALOG = [
+  ["Pommes",0,"🍎",2.5],["Bananes",0,"🍌",2.0],["Oranges",0,"🍊",2.5],["Citrons",0,"🍋",0.8],["Fraises",0,"🍓",3.5],
+  ["Raisin",0,"🍇",3.5],["Poires",0,"🍐",2.8],["Pêches",0,"🍑",3.0],["Clémentines",0,"🍊",3.0],
+  ["Tomates",0,"🍅",2.8],["Salade",0,"🥬",1.2],["Carottes",0,"🥕",1.5],["Pommes de terre",0,"🥔",2.0],
+  ["Oignons",0,"🧅",1.5],["Ail",0,"🧄",0.8],["Échalotes",0,"🧅",1.2],["Courgettes",0,"🥒",2.2],
+  ["Aubergines",0,"🍆",2.5],["Poivrons",0,"🫑",3.0],["Concombre",0,"🥒",1.1],["Champignons",0,"🍄",2.5],
+  ["Brocoli",0,"🥦",2.2],["Haricots verts",0,"🥦",4.0],["Avocats",0,"🥑",1.5],
+  ["Persil",0,"🌿",1.0],["Basilic",0,"🌿",1.5],["Poireaux",0,"🥬",2.5],["Endives",0,"🥬",2.5],["Radis",0,"🌱",1.5],
+  ["Melon",0,"🍈",2.5],["Abricots",0,"🍑",4.0],
+  ["Baguette",1,"🥖",1.2],["Pain de mie",1,"🍞",1.8],["Pain complet",1,"🍞",2.5],["Croissants",1,"🥐",4.0],
+  ["Pains au chocolat",1,"🥐",4.5],["Brioche",1,"🍞",2.8],["Biscottes",1,"🍞",1.8],
+  ["Lait",2,"🥛",1.1],["Beurre",2,"🧈",2.8],["Œufs",2,"🥚",3.2],["Yaourts",2,"🥣",2.5],["Crème fraîche",2,"🥛",1.3],
+  ["Fromage râpé",2,"🧀",2.5],["Emmental",2,"🧀",3.5],["Camembert",2,"🧀",2.8],["Comté",2,"🧀",5.0],
+  ["Fromage de chèvre",2,"🧀",2.8],["Mozzarella",2,"🧀",1.5],["Skyr",2,"🥣",2.2],["Petits-suisses",2,"🥣",2.0],
+  ["Poulet",3,"🍗",8.0],["Escalopes de dinde",3,"🍗",6.5],["Bœuf haché",3,"🥩",5.5],["Steaks",3,"🥩",7.0],
+  ["Jambon blanc",3,"🍖",3.5],["Jambon cru",3,"🍖",4.5],["Lardons",3,"🥓",2.5],["Saucisses",3,"🌭",5.0],
+  ["Côtes de porc",3,"🥩",6.0],["Saumon",3,"🐟",7.0],["Cabillaud",3,"🐟",8.0],["Crevettes",3,"🦐",8.0],
+  ["Thon en boîte",3,"🥫",2.2],["Sardines en boîte",3,"🥫",2.0],
+  ["Pâtes",4,"🍝",1.3],["Riz",4,"🍚",2.2],["Semoule",4,"🍚",1.8],["Lentilles",4,"🫘",2.0],["Pois chiches",4,"🫘",1.2],
+  ["Farine",4,"🌾",1.1],["Sucre",4,"🍬",1.4],["Sel",4,"🧂",0.8],["Poivre",4,"🧂",2.5],
+  ["Huile d'olive",4,"🫒",8.0],["Huile de tournesol",4,"🌻",3.0],["Vinaigre",4,"🍶",1.5],["Moutarde",4,"🥫",1.8],
+  ["Ketchup",4,"🍅",2.5],["Mayonnaise",4,"🥫",2.5],["Sauce tomate",4,"🥫",1.8],["Tomates pelées",4,"🥫",1.2],
+  ["Maïs en boîte",4,"🌽",1.3],["Céréales",4,"🥣",3.2],["Confiture",4,"🍓",2.5],["Miel",4,"🍯",5.0],
+  ["Pâte à tartiner",4,"🍫",3.5],["Chocolat",4,"🍫",2.2],["Biscuits",4,"🍪",2.5],["Café",4,"☕",4.5],["Thé",4,"🍵",2.5],
+  ["Chips",4,"🥔",1.8],["Cacahuètes",4,"🥜",2.0],["Olives",4,"🫒",2.0],["Soupe",4,"🍲",2.5],
+  ["Eau (pack)",5,"💧",2.5],["Eau gazeuse",5,"🫧",2.8],["Jus d'orange",5,"🧃",2.5],["Jus de pomme",5,"🧃",2.0],
+  ["Sirop",5,"🍹",3.0],["Soda",5,"🥤",2.2],["Bière",5,"🍺",6.0],["Vin rouge",5,"🍷",6.0],["Vin blanc",5,"🥂",6.0],["Cidre",5,"🍾",3.5],
+  ["Glaces",6,"🍨",4.5],["Légumes surgelés",6,"❄️",2.5],["Frites surgelées",6,"🍟",2.8],["Poisson pané",6,"🐟",3.5],
+  ["Pizza surgelée",6,"🍕",3.5],["Épinards surgelés",6,"❄️",2.2],
+  ["Dentifrice",7,"🪥",2.5],["Brosses à dents",7,"🪥",3.0],["Shampooing",7,"🧴",3.5],["Gel douche",7,"🧴",3.0],
+  ["Savon",7,"🧼",2.0],["Papier toilette",7,"🧻",5.0],["Mouchoirs",7,"🧻",2.0],["Coton",7,"🧴",2.0],
+  ["Déodorant",7,"🧴",3.0],["Rasoirs",7,"🪒",6.0],["Crème hydratante",7,"🧴",5.0],
+  ["Lessive",8,"🧺",9.0],["Adoucissant",8,"🧺",4.0],["Liquide vaisselle",8,"🧽",2.2],["Pastilles lave-vaisselle",8,"🧽",8.0],
+  ["Éponges",8,"🧽",2.0],["Essuie-tout",8,"🧻",3.5],["Sacs poubelle",8,"🗑️",3.0],["Nettoyant multi-usage",8,"🧴",2.8],
+  ["Javel",8,"🧴",1.8],["Papier aluminium",8,"📦",2.5],["Film étirable",8,"📦",2.2],["Piles",8,"🔋",6.0],["Ampoules",8,"💡",5.0]
+];
+
+/* ------------------ magasins de Fréjus ------------------ */
+/* cats: rayons proposés (index dans CATS). Liste préparée en août 2026 — modifiable dans l'onglet Magasins. */
+/* km : distance à vol d'oiseau depuis la maison (quartier Tour de Mare) */
+const ALLCATS = [0,1,2,3,4,5,6,7,8,9];
+const FREJUS_STORES = [
+  { id:"auchan",    name:"Auchan (ex-Géant)",      addr:"480 av. Eugène Joly",                grp:0, color:"#C93F2B", cats:ALLCATS, km:3.3 },
+  { id:"leclerc",   name:"E.Leclerc Valescure",    addr:"1586 av. Jean Lachenaud",            grp:0, color:"#3566A8", cats:ALLCATS, km:3.0 },
+  { id:"inter",     name:"Intermarché",            addr:"96 av. de l'Europe (Aqueduc romain)",grp:0, color:"#7B4FA3", cats:ALLCATS, km:1.7 },
+  { id:"casino",    name:"Casino Supermarché",     addr:"av. De Lattre de Tassigny",          grp:0, color:"#1F8A8A", cats:ALLCATS, km:2.2 },
+  { id:"lidl",      name:"Lidl",                   addr:"444 rue Albert Einaudi",             grp:0, color:"#2F7D4E", cats:ALLCATS, km:2.4 },
+  { id:"aldi1",     name:"Aldi",                   addr:"573 av. De Lattre de Tassigny",      grp:0, color:"#A34F6E", cats:ALLCATS, km:2.2 },
+  { id:"aldi2",     name:"Aldi Lachenaud",         addr:"1944 av. Jean Lachenaud",            grp:0, color:"#5B6E2F", cats:ALLCATS, km:3.1 },
+  { id:"netto",     name:"Netto",                  addr:"av. du 15e Corps d'Armées",          grp:0, color:"#8A5A2B", cats:ALLCATS, km:1.8 },
+  { id:"carcity",   name:"Carrefour City",         addr:"1373 av. de Provence",               grp:1, color:"#3566A8", cats:ALLCATS, km:2.7 },
+  { id:"carexp",    name:"Carrefour Express",      addr:"632 av. de Provence",                grp:1, color:"#1F8A8A", cats:ALLCATS, km:2.8 },
+  { id:"carcont",   name:"Carrefour Contact",      addr:"RD 7, Saint-Aygulf",                 grp:1, color:"#7B4FA3", cats:ALLCATS, km:7.8 },
+  { id:"picard",    name:"Picard (surgelés)",      addr:"av. du 8 Mai 1945",                  grp:2, color:"#3566A8", cats:[6], km:3.5 },
+  { id:"gfrais",    name:"Grand Frais",            addr:"Puget-sur-Argens",                   grp:2, color:"#2F7D4E", cats:[0,2,3,4], km:5.0 },
+  { id:"opaysans",  name:"Ô Paysans (producteurs)",addr:"85 ch. de la Tuillière, Puget",      grp:2, color:"#B8860B", cats:[0,1,2,3,4,5], km:5.0 },
+  { id:"marche",    name:"Marché de Fréjus",       addr:"centre-ville — mer. & sam. matin",   grp:2, color:"#C93F2B", cats:[0,2,3,9], km:2.7 }
+];
+const GRPS = ["Grandes surfaces", "Carrefour de proximité", "Spécialisés & marché"];
+const QUICK = ["auchan","leclerc","inter","casino","lidl"];
+function kmTxt(s) { return s.km ? "≈ " + String(s.km).replace(".", ",") + " km" : ""; }
+
+/* ------------------ état ------------------ */
+const KEY = "le-panier-v2";
+let state = { favs: [], custom: [], items: [], stock: [], current: null };
+try {
+  const saved = JSON.parse(localStorage.getItem(KEY));
+  if (saved && Array.isArray(saved.favs)) state = saved;
+} catch (e) {}
+function save() { localStorage.setItem(KEY, JSON.stringify(state)); }
+function uid() { return "c" + Math.random().toString(36).slice(2, 9); }
+const norm = s => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+
+function findProd(name) {
+  const p = CATALOG.find(([n]) => norm(n) === norm(name));
+  return p ? { emoji: p[2], price: p[3] } : { emoji: "🛒", price: 0 };
+}
+function eur(n) { return n.toFixed(2).replace(".", ",") + " €"; }
+function askPrice(item, after) {
+  const cur = item.price ? String(item.price).replace(".", ",") : "";
+  const v = prompt("Prix pour « " + item.name + " » (en €) :", cur);
+  if (v === null) return;
+  const p = parseFloat(v.replace(",", "."));
+  if (!isNaN(p) && p >= 0) { item.price = p; save(); after(); }
+}
+// migration : Géant Casino racheté par Auchan → on bascule les anciennes listes
+state.favs = [...new Set(state.favs.map(f => f === "geant" ? "auchan" : f))];
+state.items.forEach(i => { if (i.storeId === "geant") i.storeId = "auchan"; });
+if (state.current === "geant") state.current = "auchan";
+// migration : ajoute image et prix aux articles enregistrés avant cette version
+[state.items, state.stock].forEach(list => list.forEach(i => {
+  if (i.emoji === undefined || i.price === undefined) {
+    const p = findProd(i.name);
+    if (i.emoji === undefined) i.emoji = p.emoji;
+    if (i.price === undefined) i.price = p.price;
+  }
+}));
+save();
+
+function storeById(id) {
+  return FREJUS_STORES.find(s => s.id === id) || state.custom.find(s => s.id === id) || null;
+}
+function myStores() {
+  return FREJUS_STORES.filter(s => state.favs.includes(s.id)).concat(state.custom);
+}
+function carries(store, cat) {
+  return store.cats ? store.cats.includes(cat) : true;
+}
+function currentStore() {
+  const c = state.current && storeById(state.current);
+  if (c && (state.favs.includes(c.id) || state.custom.some(s => s.id === c.id))) return c;
+  return myStores()[0] || null;
+}
+
+/* ------------------ toast ------------------ */
+let toastT;
+function toast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("on");
+  clearTimeout(toastT);
+  toastT = setTimeout(() => t.classList.remove("on"), 2200);
+}
+
+/* ------------------ ajout produit : feuille « où l'acheter » ------------------ */
+const sheetWrap = document.getElementById("sheetwrap");
+function openSheet(name, cat) {
+  document.getElementById("sheet-title").textContent = findProd(name).emoji + " " + name;
+  const list = document.getElementById("sheet-list");
+  list.innerHTML = "";
+  const cur = currentStore();
+  const all = FREJUS_STORES.concat(state.custom).filter(s => carries(s, cat));
+  // magasin habituel d'abord, puis du plus proche de la maison au plus loin
+  all.sort((a, b) => rank(a) - rank(b) || (a.km || 99) - (b.km || 99));
+  function rank(s) { return cur && s.id === cur.id ? 0 : 1; }
+  all.forEach(s => {
+    const b = document.createElement("button");
+    b.className = "shoprow";
+    const dot = document.createElement("span");
+    dot.className = "dot";
+    dot.style.background = s.color || "#888";
+    const info = document.createElement("span");
+    info.className = "info";
+    const nm = document.createElement("span");
+    nm.className = "name";
+    nm.textContent = s.name;
+    const ad = document.createElement("span");
+    ad.className = "addr";
+    ad.textContent = (s.addr || "") + (s.km ? " · " + kmTxt(s) : "");
+    info.append(nm, ad);
+    b.append(dot, info);
+    if (cur && s.id === cur.id) {
+      const tag = document.createElement("span");
+      tag.className = "tag";
+      tag.textContent = "habituel";
+      b.appendChild(tag);
+    }
+    const plus = document.createElement("span");
+    plus.className = "plus";
+    plus.textContent = "+";
+    b.appendChild(plus);
+    b.onclick = () => {
+      addToList(name, cat, s);
+      closeSheet();
+    };
+    list.appendChild(b);
+  });
+  sheetWrap.classList.add("on");
+}
+function closeSheet() { sheetWrap.classList.remove("on"); }
+sheetWrap.addEventListener("click", e => { if (e.target === sheetWrap) closeSheet(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeSheet(); });
+
+function addToList(name, cat, store) {
+  // un magasin choisi hors favoris devient automatiquement un de « mes magasins »
+  if (!state.favs.includes(store.id) && !state.custom.some(s => s.id === store.id)) {
+    state.favs.push(store.id);
+  }
+  state.current = store.id;
+  const ex = state.items.find(i => i.storeId === store.id && norm(i.name) === norm(name) && !i.checked);
+  if (ex) ex.qty++;
+  else {
+    const p = findProd(name);
+    state.items.push({ id: uid(), name, cat, qty: 1, storeId: store.id, checked: false, emoji: p.emoji, price: p.price });
+  }
+  save(); renderAll();
+  toast(name + " → " + store.name);
+}
+
+/* ------------------ recherche ------------------ */
+const searchEl = document.getElementById("search");
+const suggestEl = document.getElementById("suggest");
+const clearEl = document.getElementById("clearsearch");
+
+function renderSuggest() {
+  const q = norm(searchEl.value.trim());
+  clearEl.classList.toggle("on", q.length > 0);
+  if (!q) { suggestEl.classList.remove("on"); suggestEl.innerHTML = ""; return; }
+  const hits = CATALOG.filter(([n]) => norm(n).includes(q)).slice(0, 7);
+  suggestEl.innerHTML = "";
+  hits.forEach(([n, c, emo, price]) => {
+    const b = document.createElement("button");
+    b.className = "sug";
+    b.innerHTML = '<span class="emo"></span><span class="name"></span><span class="cat"></span><span class="plus">+</span>';
+    b.querySelector(".emo").textContent = emo;
+    b.querySelector(".name").textContent = n;
+    b.querySelector(".cat").textContent = "≈ " + eur(price);
+    b.onclick = () => { searchEl.value = ""; renderSuggest(); openSheet(n, c); };
+    suggestEl.appendChild(b);
+  });
+  const raw = searchEl.value.trim();
+  if (raw && !hits.some(([n]) => norm(n) === q)) {
+    const b = document.createElement("button");
+    b.className = "sug custom";
+    b.innerHTML = '<span class="emo">🛒</span><span class="name"></span><span class="cat">Divers</span><span class="plus">+</span>';
+    b.querySelector(".name").textContent = "Ajouter « " + raw + " »";
+    b.onclick = () => { searchEl.value = ""; renderSuggest(); openSheet(raw, 9); };
+    suggestEl.appendChild(b);
+  }
+  suggestEl.classList.toggle("on", suggestEl.children.length > 0);
+}
+searchEl.addEventListener("input", renderSuggest);
+searchEl.addEventListener("keydown", e => {
+  if (e.key === "Enter") {
+    const first = suggestEl.querySelector(".sug");
+    if (first) first.click();
+  }
+});
+clearEl.onclick = () => { searchEl.value = ""; renderSuggest(); searchEl.focus(); };
+document.addEventListener("click", e => {
+  if (!e.target.closest(".searchwrap")) suggestEl.classList.remove("on");
+});
+
+/* ------------------ chips magasins ------------------ */
+function renderChips() {
+  const wrap = document.getElementById("storechips");
+  wrap.innerHTML = "";
+  const cur = currentStore();
+  myStores().forEach(s => {
+    const n = state.items.filter(i => i.storeId === s.id && !i.checked).length;
+    const b = document.createElement("button");
+    b.className = "chip" + (cur && s.id === cur.id ? " active" : "");
+    b.innerHTML = '<span class="dot"></span><span class="t"></span>' + (n ? '<span class="n">' + n + "</span>" : "");
+    b.querySelector(".dot").style.background = cur && s.id === cur.id ? "currentColor" : s.color;
+    b.querySelector(".t").textContent = s.name;
+    b.onclick = () => {
+      state.current = s.id; save(); renderAll(); switchTab("courses");
+      const sec = document.getElementById("store-sec-" + s.id);
+      if (sec) sec.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+    wrap.appendChild(b);
+  });
+  const add = document.createElement("button");
+  add.className = "chip ghost";
+  add.textContent = "+ Magasin";
+  add.onclick = () => switchTab("magasins");
+  wrap.appendChild(add);
+}
+
+/* ------------------ onglet courses ------------------ */
+function renderCourses() {
+  const pane = document.getElementById("pane-courses");
+  pane.innerHTML = "";
+
+  if (!myStores().length && !state.items.length) {
+    const d = document.createElement("div");
+    d.className = "empty";
+    d.innerHTML = "<strong>Bienvenue !</strong>Quels magasins fréquentez-vous à Fréjus&nbsp;?";
+    const qs = document.createElement("div");
+    qs.className = "quickstores";
+    QUICK.forEach(id => {
+      const s = storeById(id);
+      const b = document.createElement("button");
+      b.className = "chip";
+      b.textContent = s.name;
+      b.onclick = () => { state.favs.push(id); state.current = id; save(); renderAll(); toast(s.name + " ajouté ✓"); };
+      qs.appendChild(b);
+    });
+    d.appendChild(qs);
+    const p = document.createElement("p");
+    p.className = "hint";
+    p.style.textAlign = "center";
+    p.textContent = "Tous les magasins de Fréjus sont dans l'onglet Magasins. Ou tapez directement un produit en haut !";
+    d.appendChild(p);
+    pane.appendChild(d);
+    return;
+  }
+
+  if (!state.items.length) {
+    const d = document.createElement("div");
+    d.className = "empty";
+    d.innerHTML = "<strong>Votre liste est vide</strong>Tapez un produit dans la barre de recherche en haut : l'appli vous montre les magasins qui l'ont en rayon, du plus proche au plus loin.";
+    pane.appendChild(d);
+    return;
+  }
+
+  // une seule liste, groupée par magasin : « Lidl : papier toilette, savon… »
+  const stores = FREJUS_STORES.concat(state.custom).filter(s => state.items.some(i => i.storeId === s.id));
+  stores.sort((a, b) => (a.km || 99) - (b.km || 99));
+  stores.forEach(s => {
+    const items = state.items.filter(i => i.storeId === s.id)
+      .sort((a, b) => a.checked - b.checked || a.cat - b.cat || a.name.localeCompare(b.name, "fr"));
+    const subtotal = items.reduce((sum, i) => sum + (i.price || 0) * i.qty, 0);
+    const sec = document.createElement("div");
+    sec.className = "rayon";
+    sec.id = "store-sec-" + s.id;
+    const h = document.createElement("h2");
+    h.className = "storehead";
+    h.innerHTML = '<span class="sdot"></span><span class="sname"></span><span class="stot"></span>';
+    h.querySelector(".sdot").style.background = s.color || "#888";
+    h.querySelector(".sname").textContent = s.name + (s.km ? " · " + kmTxt(s) : "");
+    h.querySelector(".stot").textContent = subtotal > 0 ? "≈ " + eur(subtotal) : "";
+    sec.appendChild(h);
+    const card = document.createElement("div");
+    card.className = "cardlist";
+    items.forEach(i => card.appendChild(rowCourse(i)));
+    sec.appendChild(card);
+    pane.appendChild(sec);
+  });
+
+  const total = state.items.reduce((sum, i) => sum + (i.price || 0) * i.qty, 0);
+  if (total > 0) {
+    const tot = document.createElement("div");
+    tot.className = "totalbar";
+    tot.innerHTML = '<span>Total estimé</span><strong>≈ ' + eur(total) + "</strong>";
+    pane.appendChild(tot);
+    const note = document.createElement("p");
+    note.className = "hint";
+    note.textContent = "Prix indicatifs moyens — touchez un prix pour le corriger.";
+    pane.appendChild(note);
+  }
+
+  const nChecked = state.items.filter(i => i.checked).length;
+  if (nChecked) {
+    const b = document.createElement("button");
+    b.className = "bigbtn";
+    b.textContent = "Courses faites ✓ — enlever " + nChecked + " article" + (nChecked > 1 ? "s" : "") + " coché" + (nChecked > 1 ? "s" : "");
+    b.onclick = () => {
+      state.items = state.items.filter(i => !i.checked);
+      save(); renderAll();
+      toast("Liste mise à jour ✓");
+    };
+    pane.appendChild(b);
+  }
+}
+
+function rowCourse(i) {
+  const r = document.createElement("div");
+  r.className = "row" + (i.checked ? " done" : "");
+  const chk = document.createElement("button");
+  chk.className = "check";
+  chk.setAttribute("aria-label", i.checked ? "Décocher " + i.name : "Cocher " + i.name);
+  chk.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5 10 18 19.5 6.5"/></svg>';
+  chk.onclick = () => { i.checked = !i.checked; save(); renderAll(); };
+  r.appendChild(chk);
+
+  const emo = document.createElement("span");
+  emo.className = "emo";
+  emo.textContent = i.emoji || "🛒";
+  r.appendChild(emo);
+
+  const nm = document.createElement("span");
+  nm.className = "name";
+  const t = document.createElement("span");
+  t.textContent = i.name;
+  nm.appendChild(t);
+  const pr = document.createElement("button");
+  pr.className = "price";
+  pr.textContent = i.price ? (i.qty > 1 ? i.qty + " × " + eur(i.price) + " = " + eur(i.qty * i.price) : eur(i.price)) : "prix ?";
+  pr.setAttribute("aria-label", "Modifier le prix de " + i.name);
+  pr.onclick = () => askPrice(i, () => { renderCourses(); });
+  nm.appendChild(pr);
+  r.appendChild(nm);
+
+  if (!i.checked) {
+    r.appendChild(stepper(i.qty, d => {
+      i.qty = Math.max(1, i.qty + d);
+      save(); renderCourses(); renderChips();
+    }));
+  }
+
+  const del = document.createElement("button");
+  del.className = "rowdel";
+  del.setAttribute("aria-label", "Retirer " + i.name);
+  del.textContent = "✕";
+  del.onclick = () => { state.items = state.items.filter(x => x.id !== i.id); save(); renderAll(); };
+  r.appendChild(del);
+  return r;
+}
+
+function stepper(qty, onChange) {
+  const s = document.createElement("div");
+  s.className = "stepper" + (qty === 0 ? " qty0" : "");
+  const minus = document.createElement("button");
+  minus.textContent = "–";
+  minus.setAttribute("aria-label", "Diminuer la quantité");
+  minus.onclick = () => onChange(-1);
+  const q = document.createElement("span");
+  q.className = "q";
+  q.textContent = qty;
+  const plus = document.createElement("button");
+  plus.textContent = "+";
+  plus.setAttribute("aria-label", "Augmenter la quantité");
+  plus.onclick = () => onChange(1);
+  s.append(minus, q, plus);
+  return s;
+}
+
+/* ------------------ onglet magasins ------------------ */
+function renderStores() {
+  const pane = document.getElementById("pane-magasins");
+  pane.innerHTML = "";
+
+  GRPS.forEach((gname, g) => {
+    const stores = FREJUS_STORES.filter(s => s.grp === g);
+    if (!stores.length) return;
+    const sec = document.createElement("div");
+    sec.className = "rayon";
+    const h = document.createElement("h2");
+    h.textContent = gname;
+    sec.appendChild(h);
+    const card = document.createElement("div");
+    card.className = "cardlist";
+    stores.forEach(s => card.appendChild(storeRow(s, false)));
+    sec.appendChild(card);
+    pane.appendChild(sec);
+  });
+
+  const sec = document.createElement("div");
+  sec.className = "rayon";
+  const h = document.createElement("h2");
+  h.textContent = "Mes magasins ajoutés";
+  sec.appendChild(h);
+  if (state.custom.length) {
+    const card = document.createElement("div");
+    card.className = "cardlist";
+    state.custom.forEach(s => card.appendChild(storeRow(s, true)));
+    sec.appendChild(card);
+  }
+  const form = document.createElement("form");
+  form.className = "addform";
+  const inp = document.createElement("input");
+  inp.placeholder = "Autre magasin (ex. Biocoop)";
+  inp.setAttribute("aria-label", "Nom du nouveau magasin");
+  const btn = document.createElement("button");
+  btn.type = "submit";
+  btn.textContent = "Ajouter";
+  form.append(inp, btn);
+  form.onsubmit = e => {
+    e.preventDefault();
+    const name = inp.value.trim();
+    if (!name) return;
+    const s = { id: uid(), name, addr: "", color: "#5B6E2F", cats: null };
+    state.custom.push(s);
+    state.current = s.id;
+    save(); renderAll();
+    toast(name + " ajouté ✓");
+    inp.value = "";
+  };
+  sec.appendChild(form);
+  pane.appendChild(sec);
+
+  const hint = document.createElement("p");
+  hint.className = "hint";
+  hint.textContent = "Touchez l'étoile pour mettre un magasin dans vos habitués (il apparaît en haut de l'écran). Liste des magasins de Fréjus préparée en août 2026 — pensez à vérifier les horaires.";
+  pane.appendChild(hint);
+}
+
+function storeRow(s, isCustom) {
+  const r = document.createElement("div");
+  r.className = "storecard";
+  const isFav = state.favs.includes(s.id) || isCustom;
+
+  const star = document.createElement("button");
+  star.className = "star" + (isFav ? " on" : "");
+  star.setAttribute("aria-label", (isFav ? "Retirer" : "Ajouter") + " " + s.name + " de mes magasins");
+  star.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="' + (isFav ? "currentColor" : "none") + '" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3.5 14.7 9l6 .7-4.4 4.1 1.2 5.9L12 16.8 6.5 19.7l1.2-5.9L3.3 9.7l6-.7z"/></svg>';
+  if (!isCustom) {
+    star.onclick = () => {
+      if (state.favs.includes(s.id)) {
+        state.favs = state.favs.filter(x => x !== s.id);
+        if (state.current === s.id) state.current = null;
+      } else {
+        state.favs.push(s.id);
+        state.current = s.id;
+      }
+      save(); renderAll();
+    };
+  }
+  r.appendChild(star);
+
+  const info = document.createElement("span");
+  info.className = "info";
+  const nm = document.createElement("span");
+  nm.className = "name";
+  nm.textContent = s.name;
+  const ad = document.createElement("span");
+  ad.className = "addr";
+  ad.textContent = (s.addr || "") + (s.km ? " · " + kmTxt(s) : "");
+  info.append(nm, ad);
+  r.appendChild(info);
+
+  const n = state.items.filter(i => i.storeId === s.id && !i.checked).length;
+  if (n) {
+    const cnt = document.createElement("span");
+    cnt.className = "mini";
+    cnt.textContent = n + " art.";
+    r.appendChild(cnt);
+  }
+
+  if (isCustom) {
+    const del = document.createElement("button");
+    del.className = "mini danger";
+    del.textContent = "Suppr.";
+    del.onclick = () => {
+      if (!confirm("Supprimer « " + s.name + " » et sa liste ?")) return;
+      state.items = state.items.filter(i => i.storeId !== s.id);
+      state.custom = state.custom.filter(x => x.id !== s.id);
+      if (state.current === s.id) state.current = null;
+      save(); renderAll();
+    };
+    r.appendChild(del);
+  }
+  return r;
+}
+
+/* ------------------ onglets ------------------ */
+const TABS = ["courses", "magasins"];
+function switchTab(name) {
+  TABS.forEach(t => {
+    document.getElementById("tab-" + t).classList.toggle("on", t === name);
+    document.getElementById("pane-" + t).classList.toggle("on", t === name);
+  });
+  window.scrollTo(0, 0);
+}
+TABS.forEach(t => { document.getElementById("tab-" + t).onclick = () => switchTab(t); });
+
+/* ------------------ badges ------------------ */
+function renderBadges() {
+  const nList = state.items.filter(i => !i.checked).length;
+  const bc = document.getElementById("bub-courses");
+  bc.hidden = !nList;
+  bc.textContent = nList;
+}
+
+/* ------------------ utilitaires ------------------ */
+function esc(s) {
+  const d = document.createElement("span");
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function renderAll() {
+  renderChips();
+  renderCourses();
+  renderStores();
+  renderBadges();
+}
+renderAll();
+</script>

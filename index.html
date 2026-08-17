@@ -264,6 +264,29 @@
   .shoprow .tag { flex: none; font-size: 11px; font-weight: 700; color: var(--accent); background: var(--tint); padding: 3px 9px; border-radius: 999px; text-transform: uppercase; letter-spacing: .04em; }
   .shoprow .plus { width: 28px; height: 28px; border-radius: 50%; flex: none; background: var(--tint); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 19px; font-weight: 700; }
 
+  /* ---------- écran de connexion ---------- */
+  #lockwrap {
+    position: fixed; inset: 0; z-index: 100;
+    background: var(--bg); color: var(--ink);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 24px; text-align: center;
+  }
+  #lockwrap.off { display: none; }
+  #lockwrap .logo { margin-bottom: 14px; }
+  #lockwrap h2 { margin: 0 0 4px; font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
+  #lockwrap p { margin: 0 0 20px; color: var(--muted); font-size: 14.5px; max-width: 300px; }
+  #lockform { display: flex; flex-direction: column; gap: 10px; width: min(300px, 100%); }
+  #lockform input {
+    padding: 13px 15px; font-size: 17px; text-align: center; color: var(--ink);
+    background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+  }
+  #lockform input::placeholder { color: var(--muted); }
+  #lockform button {
+    background: var(--accent); color: var(--accent-ink);
+    font-size: 16px; font-weight: 700; padding: 14px; border-radius: 12px;
+  }
+  #lockerr { color: var(--warn); font-size: 14px; font-weight: 600; min-height: 20px; margin: 6px 0 0; }
+
   /* ---------- tab bar ---------- */
   nav {
     position: fixed; bottom: 0; left: 0; right: 0; z-index: 30;
@@ -345,6 +368,26 @@
     Magasins
   </button>
 </nav>
+
+<div id="lockwrap" role="dialog" aria-modal="true">
+  <svg class="logo" width="64" height="64" viewBox="0 0 48 48" aria-hidden="true">
+    <rect x="1.5" y="1.5" width="45" height="45" rx="12" fill="var(--accent)"/>
+    <circle cx="24" cy="15.5" r="5" fill="#F5C542"/>
+    <g stroke="#F5C542" stroke-width="2" stroke-linecap="round">
+      <path d="M24 6.2v2.4"/><path d="M15.6 9.3l1.7 1.7"/><path d="M32.4 9.3l-1.7 1.7"/>
+      <path d="M12.8 15.5h2.4"/><path d="M32.8 15.5h2.4"/>
+    </g>
+    <path d="M12.5 24.5h23l-2.6 13.2a2.4 2.4 0 0 1-2.4 1.9H17.5a2.4 2.4 0 0 1-2.4-1.9z" fill="var(--accent-ink)"/>
+    <path d="M18.5 24.5c0-4.5 2.2-7.5 5.5-7.5s5.5 3 5.5 7.5" fill="none" stroke="var(--accent-ink)" stroke-width="2.4" stroke-linecap="round"/>
+    <g stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round">
+      <path d="M19.5 28.5l1 7.5"/><path d="M24 28.5v7.5"/><path d="M28.5 28.5l-1 7.5"/>
+    </g>
+  </svg>
+  <h2 id="locktitle"></h2>
+  <p id="locksub"></p>
+  <form id="lockform"></form>
+  <p id="lockerr" role="alert"></p>
+</div>
 
 <div id="sheetwrap" role="dialog" aria-modal="true">
   <div id="sheet">
@@ -922,6 +965,76 @@ function renderAll() {
   renderBadges();
 }
 renderAll();
+
+/* ------------------ compte local : prénom + code à 4 chiffres ------------------ */
+/* Le code ne sert qu'à verrouiller CE téléphone ; rien n'est envoyé sur Internet. */
+const ACCT_KEY = "sfm-account";
+async function sha(s) {
+  const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
+  return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, "0")).join("");
+}
+function lockInput(ph, type, mode) {
+  const i = document.createElement("input");
+  i.placeholder = ph;
+  i.type = type || "text";
+  i.setAttribute("aria-label", ph);
+  if (mode) { i.inputMode = "numeric"; i.pattern = "[0-9]*"; i.maxLength = 4; i.autocomplete = "off"; }
+  return i;
+}
+function showLock() {
+  const wrap = document.getElementById("lockwrap");
+  const form = document.getElementById("lockform");
+  const err = document.getElementById("lockerr");
+  const title = document.getElementById("locktitle");
+  const sub = document.getElementById("locksub");
+  let acct = null;
+  try { acct = JSON.parse(localStorage.getItem(ACCT_KEY)); } catch (e) {}
+  form.innerHTML = "";
+  err.textContent = "";
+
+  if (!acct) {
+    title.textContent = "Bienvenue !";
+    sub.textContent = "Créez votre compte : il verrouille l'appli sur ce téléphone.";
+    const name = lockInput("Votre prénom");
+    const pin1 = lockInput("Code secret (4 chiffres)", "password", true);
+    const pin2 = lockInput("Répétez le code", "password", true);
+    const btn = document.createElement("button");
+    btn.type = "submit";
+    btn.textContent = "Créer mon compte";
+    form.append(name, pin1, pin2, btn);
+    form.onsubmit = async e => {
+      e.preventDefault();
+      if (!name.value.trim()) { err.textContent = "Écrivez votre prénom."; return; }
+      if (!/^\d{4}$/.test(pin1.value)) { err.textContent = "Le code doit faire 4 chiffres."; return; }
+      if (pin1.value !== pin2.value) { err.textContent = "Les deux codes ne sont pas identiques."; return; }
+      localStorage.setItem(ACCT_KEY, JSON.stringify({ name: name.value.trim(), hash: await sha(pin1.value) }));
+      wrap.classList.add("off");
+      toast("Bienvenue " + name.value.trim() + " 👋");
+    };
+    name.focus();
+  } else {
+    title.textContent = "Bonjour " + acct.name + " !";
+    sub.textContent = "Entrez votre code secret pour ouvrir vos listes.";
+    const pin = lockInput("Code secret", "password", true);
+    const btn = document.createElement("button");
+    btn.type = "submit";
+    btn.textContent = "Ouvrir";
+    form.append(pin, btn);
+    form.onsubmit = async e => {
+      e.preventDefault();
+      if (await sha(pin.value) === acct.hash) {
+        wrap.classList.add("off");
+        toast("Bonjour " + acct.name + " 👋");
+      } else {
+        err.textContent = "Ce n'est pas le bon code, réessayez.";
+        pin.value = "";
+        pin.focus();
+      }
+    };
+    pin.focus();
+  }
+}
+showLock();
 
 /* installation en tant qu'appli (PWA) */
 if ("serviceWorker" in navigator) {
